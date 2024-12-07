@@ -18,15 +18,26 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import io.ktor.http.HttpStatusCode
+import io.github.cdimascio.dotenv.Dotenv
 
 
 fun main() {
-    embeddedServer(Netty, port = 8080) {
-        module()
+    val dotenv = Dotenv.load()
+
+    val PORT = dotenv["PORT"]?.toIntOrNull() ?: 8080
+    val SOUNDCLOUD_CLIENT_ID = dotenv["SOUNDCLOUD_CLIENT_ID"]
+    val SOUNDCLOUD_CLIENT_SECRET = dotenv["SOUNDCLOUD_CLIENT_SECRET"]
+
+    if (SOUNDCLOUD_CLIENT_ID == null || SOUNDCLOUD_CLIENT_SECRET == null || PORT==null) {
+        throw IllegalStateException("Missing SoundCloud credentials in .env file")
+    }
+
+    embeddedServer(Netty, port = PORT) {
+        module(SOUNDCLOUD_CLIENT_ID, SOUNDCLOUD_CLIENT_SECRET)
     }.start(wait = true)
 }
 
-fun Application.module() {
+fun Application.module(clientId: String, clientSecret: String) {
     install(ContentNegotiation) {
         json()
     }
@@ -39,8 +50,8 @@ fun Application.module() {
                     name = "soundcloud",
                     authorizeUrl = "https://soundcloud.com/connect",
                     accessTokenUrl = "https://api.soundcloud.com/oauth2/token",
-                    clientId = "z1zS0nvwlaPi0dO4ySOWO1UsOaZn9j7I", // Replace with your SoundCloud client ID
-                    clientSecret = "1zjaXB8a1bIy7wRkEnHWCLpSTD6ImjvX", // Replace with your SoundCloud client secret
+                    clientId = clientId, 
+                    clientSecret = clientSecret,
                     defaultScopes = listOf("non-expiring")
                 )
             }

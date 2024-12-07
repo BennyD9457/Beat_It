@@ -20,8 +20,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json")
     testImplementation("io.ktor:ktor-server-tests")
     implementation("ch.qos.logback:logback-classic:1.4.11")
-
-
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.0")
 }
 
 
